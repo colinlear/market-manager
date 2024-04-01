@@ -1,0 +1,175 @@
+type MarketAccess {
+  marketId: String!
+  userId: String!
+  access: String!
+  savedMarkets: SavedMarketConnector
+  marketDates: MarketDateConnector
+  created: AWSDateTime!
+  modified: AWSDateTime!
+}
+
+type MarketAccessConnector {
+  nextToken: String
+  items: [MarketAccess]
+}
+
+type SavedMarket {
+  savedMarketId: String!
+  marketId: String!
+  name: String
+  layout: [MarketRow]
+  bookings: [SavedMarketBooking]
+  created: AWSDateTime!
+  modified: AWSDateTime!
+}
+
+type SavedMarketBooking {
+  stallId: String!
+  row: Int!
+  column: Int!
+  stall: MarketStall
+}
+
+type SavedMarketConnector {
+  nextToken: String
+  items: [SavedMarket]
+}
+
+type MarketDate {
+  marketId: String!
+  marketName: String
+  date: AWSDate!
+  name: String
+  layout: [MarketRow]
+  bookings: MarketBookingConnector
+  created: AWSDateTime!
+  modified: AWSDateTime!
+}
+
+type MarketDateConnector {
+  nextToken: String
+  items: [MarketDate!]
+}
+
+type MarketRow {
+  row: Int!
+  repeating: Boolean
+  slots: [MarketSlot]
+}
+
+type MarketSlot {
+  row: Int!
+  column: Int!
+  categories: [String]
+  powered: Boolean
+  reserved: Boolean
+  special: Boolean
+}
+
+type MarketBooking {
+  marketId: String!
+  date: AWSDate!
+  stallId: String!
+  row: Int!
+  column: Int!
+  stall: MarketStall
+  created: AWSDateTime!
+  modified: AWSDateTime!
+}
+
+type MarketBookingConnector {
+  nextToken: String
+  items: [MarketBooking!]
+}
+
+type MarketStall {
+  stallId: String!
+  userId: String!
+  name: String
+  description: String
+  catgory: [String]
+  contact: MarketContact
+  created: AWSDateTime!
+  modified: AWSDateTime!
+}
+
+type MarketStallConnector {
+  nextToken: String
+  items: [MarketStall]
+}
+
+type MarketContact {
+  name: String!
+  phone: String
+  email: String
+  website: String
+}
+
+type Query {
+  listMarkets(nextToken: String): MarketAccessConnector
+  listUserStalls(nextToken: String): MarketStallConnector
+  listMarketStalls(nextToken: String): MarketStallConnector
+  getMarketDate(marketId: String!, date: String!): MarketDate
+}
+
+input MarketStallInput {
+  name: String!
+  description: String
+  category: [String]
+  contact: MarketContactInput!
+  requirements: MarketStallRequirementsInput!
+}
+
+input MarketContactInput {
+  name: String!
+  phone: String
+  email: String
+  website: String
+}
+
+input MarketStallRequirementsInput {
+  power: Boolean
+  tent: Int
+  table: Int
+}
+
+input MarketDateInput {
+  date: AWSDate!
+  marketName: String!
+  name: String!
+  layout: [MarketRow]!
+}
+
+input MarketBookingInput {
+  date: AWSDate!
+  stallId: String!
+  row: Int!
+  column: Int!
+}
+
+type Mutation {
+  createMarket(marketId: String!): MarketAccess
+  inviteManager(marketId: String!, email: String!): MarketAccess
+  addManager(marketId: String!, userId: String!): MarketAccess
+  removeManager(marketId: String!, userId: String!): MarketAccess
+
+  createStall(stall: MarketStallInput): MarketStall
+  updateStall(stallId: String!, stall: MarketStallInput): MarketStall
+  deleteStall(stallId: String!): MarketStall
+
+  inviteStallOwner(stallId: String!, email: String!): MarketStall
+
+  addMarketDate(marketId: String!, market: MarketDateInput!): MarketDate
+  deleteMarketDate(marketId: String!, date: AWSDate): MarketDate
+  updateMarketDate(marketId: String!, market: MarketDateInput!): MarketDate
+
+  bookMarketSlot(marketId: String!, booking: MarketBookingInput!): MarketBooking
+  updateMarketSlot(
+    marketId: String!
+    booking: MarketBookingInput!
+  ): MarketBooking
+  cancelMarketSlot(
+    marketId: String!
+    booking: MarketBookingInput!
+  ): MarketBooking
+}
